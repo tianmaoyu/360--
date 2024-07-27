@@ -1,6 +1,10 @@
 
 import * as THREE from "three";
 import { OrbitControls } from 'three/examples/jsm/controls/OrbitControls.js';
+import { Line2 } from 'three/examples/jsm/lines/Line2'
+import { LineGeometry } from 'three/examples/jsm/lines/LineGeometry'
+import { LineMaterial } from 'three/examples/jsm/lines/LineMaterial'
+
 
 var scene = new THREE.Scene();
 var camera = new THREE.PerspectiveCamera(75, window.innerWidth / window.innerHeight, 0.1, 10000);
@@ -26,7 +30,7 @@ controls.enablePan = true; // 启用平移
 
 
 let currentMesh;
-let sclae = 100
+let sclae = 30
 
 var url1 = "./public/p1.png"
 new THREE.TextureLoader().load(url1, texture => {
@@ -62,19 +66,37 @@ new THREE.TextureLoader().load(url3, texture => {
 })
 
 
+// 线条的高度就是，无人机的高度
 
-
-var startpoint = new THREE.Vector3(50, 0, 0)
+var startpoint = new THREE.Vector3(50, -10000, 0)
 var endpoint = new THREE.Vector3(50, 50, 0)
-var line_1 = new THREE.Line(
+var line_1 = new THREE.Line3(
   new THREE.BufferGeometry().setFromPoints([startpoint, endpoint]),
   new THREE.LineDashedMaterial({
     color: 0xFF0000, // 线的颜色  
-    dashSize: 0.2, // 虚线的线段长度  
-    gapSize: 0.1  // 虚线的间隔长度  
+    dashSize: 10, // 虚线的线段长度  
+    gapSize: 1  // 虚线的间隔长度  
   })
 )
-scene.add(line_1)
+var geometry = new LineGeometry()
+var pointArr = [
+  50, -10000, 0,
+  50, 50, 0,
+]
+geometry.setPositions(pointArr)
+var material = new LineMaterial({
+        color: 0xffffff,
+        linewidth: 4,
+        dashed: true,
+        dashSize: 2,
+        gapSize: 2
+})
+
+material.resolution.set(window.innerWidth, window.innerHeight)
+var line = new Line2(geometry, material)
+line.computeLineDistances()
+scene.add(line)
+
 
 var circle = new THREE.Mesh(
   new THREE.CircleGeometry(0.05, 32),
