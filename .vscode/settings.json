@@ -1,0 +1,10 @@
+{
+
+    "C_Cpp.codeAnalysis.exclude": {},
+    "files.exclude": {
+        "**/node_modules": false
+    },
+    "search.exclude": {
+        "**/node_modules": false
+    }
+}

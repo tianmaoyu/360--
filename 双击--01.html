@@ -1,0 +1,85 @@
+<!DOCTYPE html>  
+<html lang="en">  
+<head>  
+    <meta charset="UTF-8">  
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">  
+    <title>Three.js Double Click to Scale Sphere</title>  
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>  
+</head>  
+<body>  
+    <script>  
+        // 创建场景  
+        const scene = new THREE.Scene();  
+  
+        // 创建相机  
+        const camera = new THREE.PerspectiveCamera(75, window.innerWidth / window.innerHeight, 0.1, 1000);  
+        camera.position.z = 50;  
+  
+        // 创建渲染器  
+        const renderer = new THREE.WebGLRenderer();  
+        renderer.setSize(window.innerWidth, window.innerHeight);  
+        document.body.appendChild(renderer.domElement);  
+  
+        // 创建多个球体并添加到场景中  
+        const sphereGeometry = new THREE.SphereGeometry(5, 32, 32);  
+        const sphereMaterial = new THREE.MeshBasicMaterial({ color: 0x0077ff });  
+  
+        for (let i = 0; i < 10; i++) {  
+            const sphere = new THREE.Mesh(sphereGeometry, sphereMaterial.clone());  
+            sphere.position.set(  
+                Math.random() * 50 - 25,  
+                Math.random() * 50 - 25,  
+                Math.random() * 50 - 25  
+            );  
+            sphere.name = `sphere_${i}`; // 为每个球体分配一个唯一的标识符  
+            scene.add(sphere);  
+        }  
+  
+        // 创建 Raycaster 和鼠标向量  
+        const raycaster = new THREE.Raycaster();  
+        const mouse = new THREE.Vector2();  
+  
+        // 处理双击事件  
+        function onDoubleClick(event) {  
+            // 计算鼠标位置在屏幕上的归一化坐标  
+            mouse.x = (event.clientX / window.innerWidth) * 2 - 1;  
+            mouse.y = -(event.clientY / window.innerHeight) * 2 + 1;  
+  
+            // 通过相机和鼠标位置更新射线  
+            raycaster.setFromCamera(mouse, camera);  
+  
+            // 计算物体和射线的交点  
+            const intersects = raycaster.intersectObjects(scene.children);  
+  
+            // 如果有交点  
+            if (intersects.length > 0) {  
+                const firstIntersectedObject = intersects[0].object;  
+                console.log(`Double-clicked on: ${firstIntersectedObject.name}`);  
+                  
+                // 放大被双击的球体  
+                firstIntersectedObject.scale.set(2, 2, 2); // 将球体放大到原来的2倍  
+            }  
+        }  
+  
+        // 添加双击事件监听  
+        window.addEventListener('dblclick', onDoubleClick);  
+  
+        // 渲染循环  
+        function animate() {  
+            requestAnimationFrame(animate);  
+            renderer.render(scene, camera);  
+        }  
+  
+        animate();  
+  
+        // 调整窗口大小时更新渲染器和相机  
+        window.addEventListener('resize', () => {  
+            const width = window.innerWidth;  
+            const height = window.innerHeight;  
+            renderer.setSize(width, height);  
+            camera.aspect = width / height;  
+            camera.updateProjectionMatrix();  
+        });  
+    </script>  
+</body>  
+</html>  

@@ -1,0 +1,112 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Three.js Double Click to Scale Sphere</title>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
+</head>
+
+<body>
+    <script>
+        // 创建场景
+        const scene = new THREE.Scene();
+
+        // 创建相机
+        const camera = new THREE.PerspectiveCamera(75, window.innerWidth / window.innerHeight, 0.1, 100000);
+        camera.position.z = 50;
+
+        // 创建渲染器
+        const renderer = new THREE.WebGLRenderer();
+        renderer.setSize(window.innerWidth, window.innerHeight);
+        document.body.appendChild(renderer.domElement);
+        // var controls = new OrbitControls(camera, renderer.domElement);
+        // controls.enableZoom = true; // 启用缩放  
+        // controls.enablePan = true; // 启用平移  
+
+
+
+        new THREE.TextureLoader().load("./src/p2.png", (texture) => {
+            var geometry = new THREE.SphereGeometry(10, 60, 60);
+            geometry.scale(-1, 1, 1);
+            var material = new THREE.MeshBasicMaterial({ map: texture });
+            var mesh = new THREE.Mesh(geometry, material);
+            mesh.position.set(0, 50, 0)
+            mesh.name = "p2.png"
+            scene.add(mesh);
+        })
+
+
+
+        new THREE.TextureLoader().load("./src/p3.png", (texture) => {
+            var geometry = new THREE.SphereGeometry(10, 60, 60);
+            geometry.scale(-1, 1, 1);
+            var material = new THREE.MeshBasicMaterial({ map: texture });
+            var mesh = new THREE.Mesh(geometry, material);
+            mesh.position.set(50, 0, 0)
+            mesh.name = "p3.png"
+            scene.add(mesh);
+        })
+
+
+
+        new THREE.TextureLoader().load("./src/p4.png", (texture) => {
+            var geometry = new THREE.SphereGeometry(1000, 60, 60);
+            geometry.scale(-1, 1, 1);
+            var material = new THREE.MeshBasicMaterial({ map: texture });
+            var mesh = new THREE.Mesh(geometry, material);
+            mesh.position.set(0, 50, 0)
+            mesh.name = "p4.png"
+            scene.add(mesh);
+        })
+
+
+        // 创建 Raycaster 和鼠标向量
+        const raycaster = new THREE.Raycaster();
+        const mouse = new THREE.Vector2();
+
+        // 处理双击事件
+        function onDoubleClick(event) {
+            // 计算鼠标位置在屏幕上的归一化坐标
+            mouse.x = (event.clientX / window.innerWidth) * 2 - 1;
+            mouse.y = -(event.clientY / window.innerHeight) * 2 + 1;
+
+            // 通过相机和鼠标位置更新射线
+            raycaster.setFromCamera(mouse, camera);
+
+            // 计算物体和射线的交点
+            const intersects = raycaster.intersectObjects(scene.children);
+
+            // 如果有交点
+            if (intersects.length > 0) {
+                const firstIntersectedObject = intersects[0].object;
+                console.log(`Double-clicked on: ${firstIntersectedObject.name}`);
+                // 放大被双击的球体
+                firstIntersectedObject.scale.set(2, 2, 2); // 将球体放大到原来的2倍
+            }
+        }
+
+        // 添加双击事件监听
+        window.addEventListener('dblclick', onDoubleClick);
+
+        // 渲染循环
+        function animate() {
+            requestAnimationFrame(animate);
+            renderer.render(scene, camera);
+        }
+
+        animate();
+
+        // 调整窗口大小时更新渲染器和相机
+        window.addEventListener('resize', () => {
+            const width = window.innerWidth;
+            const height = window.innerHeight;
+            renderer.setSize(width, height);
+            camera.aspect = width / height;
+            camera.updateProjectionMatrix();
+        });
+    </script>
+</body>
+
+</html>
