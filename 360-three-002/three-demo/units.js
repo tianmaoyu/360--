@@ -1,6 +1,7 @@
 import proj4 from "proj4"
 import exifr from 'exifr'
 
+
 /**
  * 获取图片的GPS位置信息。
  */
@@ -10,6 +11,15 @@ export async function get_pose(url) {
     let longitude = xmp["longitude"]
     let altitude = xmp["RelativeAltitude"]
     return { longitude, latitude, altitude }
+}
+
+export async function get_degree(url) {
+    const  degrees= Math.PI/180
+    let xmp = await exifr.parse(url, { gps: true, xmp: true })
+    let yaw = degrees* xmp["GimbalYawDegree"]
+    let pitch = degrees* xmp["GimbalPitchDegree"]
+    let roll = degrees* xmp["GimbalRollDegree"]
+    return { yaw , pitch, roll }
 }
 
 export function lonlat_to_xyz(points) {

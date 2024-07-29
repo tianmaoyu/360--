@@ -4,7 +4,10 @@ import { OrbitControls } from 'three/examples/jsm/controls/OrbitControls.js';
 import { Line2 } from 'three/examples/jsm/lines/Line2'
 import { LineGeometry } from 'three/examples/jsm/lines/LineGeometry'
 import { LineMaterial } from 'three/examples/jsm/lines/LineMaterial'
-import { RGBELoader } from 'three/examples/jsm/loaders/RGBELoader.js';  
+
+import { TextGeometry } from 'three/examples/jsm/geometries/TextGeometry.js';
+import { FontLoader } from 'three/examples/jsm/loaders/FontLoader.js';
+
 import proj4 from "proj4"
 import * as Units from "./units.js"
 
@@ -36,7 +39,7 @@ controls.enableZoom = true; // 启用缩放
 controls.enablePan = true; // 启用平移  
 
 
-let currentMesh=null;
+let currentMesh = null;
 let sclae = 100
 
 
@@ -44,24 +47,27 @@ var url1 = "./imgs/1.JPG"
 var url2 = "./imgs/2.JPG"
 var url3 = "./imgs/3.JPG"
 
-var point1= await Units.get_pose(url1)
-var point2= await Units.get_pose(url2)
-var point3= await Units.get_pose(url3)
+var point1 = await Units.get_pose(url1)
+var point2 = await Units.get_pose(url2)
+var point3 = await Units.get_pose(url3)
 
-var xyz_list= Units.lonlat_to_xyz([point1,point2,point3])
-var origin= Units.relative_origin(xyz_list)
-point1= Units.relative_position(xyz_list[0], origin)
-point2= Units.relative_position(xyz_list[1], origin)
-point3= Units.relative_position(xyz_list[2], origin)
+var degree1 = await Units.get_degree(url1)
+var degree2 = await Units.get_degree(url2)
+var degree3 = await Units.get_degree(url3)
+
+var xyz_list = Units.lonlat_to_xyz([point1, point2, point3])
+var origin = Units.relative_origin(xyz_list)
+point1 = Units.relative_position(xyz_list[0], origin)
+point2 = Units.relative_position(xyz_list[1], origin)
+point3 = Units.relative_position(xyz_list[2], origin)
 point1 = point1.map(num => Math.round(num));
 point2 = point2.map(num => Math.round(num));
 point3 = point3.map(num => Math.round(num));
 
 new THREE.TextureLoader().load(url1, texture => {
-
   var geometry = new THREE.SphereGeometry(15, 60, 120);
   geometry.scale(-1, 1, 1);
-  var material = new THREE.MeshBasicMaterial({ map: texture,side: THREE.DoubleSide});
+  var material = new THREE.MeshBasicMaterial({ map: texture, side: THREE.DoubleSide });
   material.map.colorSpace = 'srgb';
   var mesh = new THREE.Mesh(geometry, material);
   mesh.position.set(point1[0], point1[1], point1[2])
@@ -72,9 +78,9 @@ new THREE.TextureLoader().load(url1, texture => {
 
 
 new THREE.TextureLoader().load(url2, texture => {
-  var geometry = new THREE.SphereGeometry(15,60, 120);
+  var geometry = new THREE.SphereGeometry(15, 60, 120);
   geometry.scale(-1, 1, 1);
-  var material = new THREE.MeshBasicMaterial({ map: texture});
+  var material = new THREE.MeshBasicMaterial({ map: texture });
   // 颜色不一致
   material.map.colorSpace = 'srgb';
   var mesh = new THREE.Mesh(geometry, material);
@@ -83,35 +89,34 @@ new THREE.TextureLoader().load(url2, texture => {
 })
 
 
-
-
-new THREE.TextureLoader().load(url3,  texture => {
- 
-
+new THREE.TextureLoader().load(url3, texture => {
   var geometry = new THREE.SphereGeometry(15, 60, 120);
   geometry.scale(-1, 1, 1);
-  var material = new THREE.MeshBasicMaterial({ map: texture});
+  var material = new THREE.MeshBasicMaterial({ map: texture });
   material.map.colorSpace = 'srgb';
   var mesh = new THREE.Mesh(geometry, material);
   mesh.position.set(point3[0], point3[1], point3[2])
   scene.add(mesh);
-  // currentMesh = mesh
 })
 
-let line1=get_line(point1,origin)
+let line1 = get_line(point1, origin)
 scene.add(line1)
-let line2=get_line(point2,origin)
+let line2 = get_line(point2, origin)
 scene.add(line2)
-let line3=get_line(point3,origin)
+let line3 = get_line(point3, origin)
 scene.add(line3)
 
-function get_line(point,origin){
+var label_1 = create_label("1.JPG", point1)
+var label_2 = create_label("2.JPG", point2)
+var label_3 = create_label("3.JPG", point3)
+
+function get_line(point, origin) {
   var geometry = new LineGeometry()
   var pointArr = [
-    point[0], point[1]-origin.z-15, point[2],
-    point[0], point[1]-15, point[2],
+    point[0], point[1] - origin.z - 15, point[2],
+    point[0], point[1] - 15, point[2],
   ]
-  
+
   geometry.setPositions(pointArr)
   var material = new LineMaterial({
     color: 0xffffff,
@@ -120,11 +125,54 @@ function get_line(point,origin){
     dashSize: 2,
     gapSize: 2
   })
-  
+
   material.resolution.set(window.innerWidth, window.innerHeight)
   var line = new Line2(geometry, material)
   line.computeLineDistances()
   return line
+}
+
+
+function create_label(name, point) {
+  // 创建一个Canvas元素  
+  let x=point[0]
+  let y=point[1]-100
+  let z=point[2] 
+
+  const canvas = document.createElement('canvas');
+  const context = canvas.getContext('2d');
+
+  context.font = "30px 宋体";
+  const metrics = context.measureText(name);
+  const textWidth = metrics.width;
+  // 设置Canvas的尺寸  
+  canvas.width = textWidth ; // 给文字留一些边距  
+  canvas.height = 30; // 高度可以根据字体大小调整  
+  // 再次设置字体样式，因为Canvas尺寸更改会重置样式  
+  context.font = "30px 宋体";
+  context.fillStyle = "rgba(255, 255, 0, 1)"; // 黄色文字  
+  context.clearRect(0, 0, canvas.width, canvas.height); // 清除背景  
+  context.fillText(name, 5, 22); // 调整Y坐标以适应字体基线  
+  // 创建一个纹理  
+  const texture = new THREE.CanvasTexture(canvas);
+  texture.needsUpdate = true; // 更新纹理  
+  // 创建平面几何体  
+  const planeGeometry = new THREE.PlaneGeometry(canvas.width / 100, canvas.height / 100); // 将Canvas尺寸转换为3D空间尺寸  
+  planeGeometry.scale(100, 100, 100)
+  // 创建材质  
+  const planeMaterial = new THREE.MeshBasicMaterial({
+    map: texture,
+    transparent: true // 使背景透明  
+  });
+  // 创建网格模型  
+  const planeMesh = new THREE.Mesh(planeGeometry, planeMaterial);
+  // 设置位置  
+  planeMesh.position.set(x, y, z);
+  // 面向摄像机  
+  planeMesh.lookAt(camera.position);
+  // 添加到场景  
+  scene.add(planeMesh);
+  return planeMesh
 }
 
 
@@ -200,7 +248,7 @@ function changeSphere(nextMesh) {
   camera.position.set(x - 1, y, z);
   camera.lookAt(new THREE.Vector3(x + 1, y, z))
   // 当前的缩小
-  if(currentMesh){
+  if (currentMesh) {
     currentMesh.geometry.scale(1 / sclae, 1 / sclae, 1 / sclae)
   }
   //下一个
@@ -237,45 +285,13 @@ window.addEventListener('resize', () => {
   camera.updateProjectionMatrix();
 });
 
-// 北东地-转 three
-function webMercator_to_three(point){
-  var x=point[0]
-  var y=point[1]
-  var z=point[2]
-  return [x,z,-y]
-}
-// 相对的 坐标 x,y,z
-function relative_position(point, origin_point) {
-
-  var origin_lon = origin_point[0]
-  var origin_lat = origin_point[1]
-  var origin_alt = origin_point[2]
-
-  var origin_xy = wgs84_to_webMercator(origin_lon, origin_lat)
-
-  var lon = point[0]
-  var lat = point[1]
-  var alt = point[2]
-
-  var xy = wgs84_to_webMercator(lon, lat)
-
-  var result = [origin_xy[0]-xy[0], origin_xy[1]-xy[1], alt-origin_alt]
-  console.info("相对：", result)
-  return result
-
-}
-
-// 转换为Web Mercator坐标  
-function wgs84_to_webMercator(lon, lat) {
-  var wgs84 = 'EPSG:4326';
-  var webMercator = 'EPSG:3857';
-  var xy = proj4(wgs84, webMercator, [lon, lat]);
-  return xy
-}
 
 // 渲染循环  
 function animate() {
   requestAnimationFrame(animate);
   renderer.render(scene, camera);
+  // label_1.lookAt(camera.position);
+  // label_2.lookAt(camera.position);
+  // label_3.lookAt(camera.position);
 }
 animate();  
