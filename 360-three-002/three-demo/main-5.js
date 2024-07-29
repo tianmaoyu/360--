@@ -52,8 +52,12 @@ var point2 = await Units.get_pose(url2)
 var point3 = await Units.get_pose(url3)
 
 var degree1 = await Units.get_degree(url1)
+
 var degree2 = await Units.get_degree(url2)
 var degree3 = await Units.get_degree(url3)
+console.info(JSON.stringify(degree1))
+console.info(JSON.stringify(degree2))
+console.info(JSON.stringify(degree3))
 
 var xyz_list = Units.lonlat_to_xyz([point1, point2, point3])
 var origin = Units.relative_origin(xyz_list)
@@ -71,6 +75,9 @@ new THREE.TextureLoader().load(url1, texture => {
   material.map.colorSpace = 'srgb';
   var mesh = new THREE.Mesh(geometry, material);
   mesh.position.set(point1[0], point1[1], point1[2])
+  const euler = new THREE.Euler(degree1.yaw, degree1.pitch, degree1.roll, 'ZYX'); 
+  // mesh.rotation.set(-degree1.pitch, -degree1.yaw, -degree1.roll);
+  mesh.quaternion.setFromEuler(euler)
   scene.add(mesh);
 });
 
@@ -85,6 +92,10 @@ new THREE.TextureLoader().load(url2, texture => {
   material.map.colorSpace = 'srgb';
   var mesh = new THREE.Mesh(geometry, material);
   mesh.position.set(point2[0], point2[1], point2[2])
+  // mesh.rotation.set(-degree2.pitch, -degree2.yaw, -degree2.roll);
+  const euler = new THREE.Euler(degree2.yaw, degree2.pitch, degree2.roll, 'ZYX'); 
+  // mesh.rotation.set(-degree1.pitch, -degree1.yaw, -degree1.roll);
+  mesh.quaternion.setFromEuler(euler)
   scene.add(mesh);
 })
 
@@ -96,6 +107,9 @@ new THREE.TextureLoader().load(url3, texture => {
   material.map.colorSpace = 'srgb';
   var mesh = new THREE.Mesh(geometry, material);
   mesh.position.set(point3[0], point3[1], point3[2])
+  // mesh.rotation.set(-degree3.pitch, -degree3.yaw, -degree3.roll);
+  const euler = new THREE.Euler(degree3.yaw, degree3.pitch, degree3.roll, 'ZYX'); 
+  mesh.quaternion.setFromEuler(euler)
   scene.add(mesh);
 })
 
