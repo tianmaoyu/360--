@@ -16,9 +16,12 @@ export async function get_pose(url) {
 export async function get_degree(url) {
     const  degrees= Math.PI/180
     let xmp = await exifr.parse(url, { gps: true, xmp: true })
-    let yaw = degrees* xmp["GimbalYawDegree"]
-    let pitch = degrees* xmp["GimbalPitchDegree"]
-    let roll = degrees* xmp["GimbalRollDegree"]
+    // let yaw = degrees* xmp["GimbalYawDegree"]
+    // let pitch = degrees* xmp["GimbalPitchDegree"]
+    // let roll = degrees* xmp["GimbalRollDegree"]
+    let yaw =  xmp["GimbalYawDegree"]
+    let pitch =  xmp["GimbalPitchDegree"]
+    let roll =  xmp["GimbalRollDegree"]
     return { yaw , pitch, roll }
 }
 

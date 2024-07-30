@@ -4,6 +4,7 @@ import { OrbitControls } from 'three/examples/jsm/controls/OrbitControls.js';
 import { Line2 } from 'three/examples/jsm/lines/Line2'
 import { LineGeometry } from 'three/examples/jsm/lines/LineGeometry'
 import { LineMaterial } from 'three/examples/jsm/lines/LineMaterial'
+import { GUI } from 'dat.gui';
 
 import { TextGeometry } from 'three/examples/jsm/geometries/TextGeometry.js';
 import { FontLoader } from 'three/examples/jsm/loaders/FontLoader.js';
@@ -33,6 +34,10 @@ var gridHelper = new THREE.GridHelper(1000, 100);
 var axesHelper = new THREE.AxesHelper(1000);
 scene.add(axesHelper);
 
+var axesHelper2 = new THREE.AxesHelper(1000);
+axesHelper2.position.set(0, -90, 0)
+scene.add(axesHelper2);
+
 // 添加鼠标控制  
 var controls = new OrbitControls(camera, renderer.domElement);
 controls.enableZoom = true; // 启用缩放  
@@ -47,6 +52,8 @@ var url1 = "./imgs/1.JPG"
 var url2 = "./imgs/2.JPG"
 var url3 = "./imgs/3.JPG"
 
+
+
 var point1 = await Units.get_pose(url1)
 var point2 = await Units.get_pose(url2)
 var point3 = await Units.get_pose(url3)
@@ -55,9 +62,9 @@ var degree1 = await Units.get_degree(url1)
 
 var degree2 = await Units.get_degree(url2)
 var degree3 = await Units.get_degree(url3)
-console.info(JSON.stringify(degree1))
-console.info(JSON.stringify(degree2))
-console.info(JSON.stringify(degree3))
+console.info("1.png",JSON.stringify(degree1))
+console.info("2.png",JSON.stringify(degree2))
+console.info("3.png",JSON.stringify(degree3))
 
 var xyz_list = Units.lonlat_to_xyz([point1, point2, point3])
 var origin = Units.relative_origin(xyz_list)
@@ -74,15 +81,44 @@ new THREE.TextureLoader().load(url1, texture => {
   var material = new THREE.MeshBasicMaterial({ map: texture, side: THREE.DoubleSide });
   material.map.colorSpace = 'srgb';
   var mesh = new THREE.Mesh(geometry, material);
-  mesh.position.set(point1[0], point1[1], point1[2])
+
   // const euler = new THREE.Euler(degree1.yaw, degree1.pitch, degree1.roll, 'ZYX'); 
-  // mesh.rotation.set(-degree1.pitch, -degree1.yaw, -degree1.roll);
+  // mesh.rotation.set(-degree1.pitch, -c.yaw, -degree1.roll);
   // mesh.quaternion.setFromEuler(euler)
-  mesh.rotation.order = "YXZ"; // 偏航角(Y), 俯仰角(X), 滚动角(Z)  
-  mesh.rotation.y = -degree1.yaw;
-  mesh.rotation.x = degree1.pitch;
-  mesh.rotation.z = degree1.roll;
+  // mesh.rotation.order = "YXZ"; // 偏航角(Y), 俯仰角(X), 滚动角(Z)  
+  // mesh.rotation.y = -degree1.yaw;
+  // mesh.rotation.x = degree1.pitch;
+  // mesh.rotation.z = degree1.pitch;
+  // mesh.rotation.order = 'ZXY';
+  // mesh.rotation.z = -degree1.yaw;    // Yaw  
+  // mesh.rotation.x = degree1.pitch;  // Pitch  
+  // mesh.rotation.y = degree1.roll;   // Roll  
+  // mesh.rotation.order = 'YXZ';
+  // mesh.rotation.y =THREE.MathUtils.degToRad(degree1.yaw) ;
+
+  camera.updateProjectionMatrix();
+  mesh.position.set(point1[0], point1[1], point1[2])
   scene.add(mesh);
+
+  // 添加旋转控制（使用度数）  
+  const meshFolder = cubeFolder.addFolder('1.png');
+  const meshRotation = {
+    x: THREE.MathUtils.radToDeg(mesh.rotation.x),
+    y: THREE.MathUtils.radToDeg(mesh.rotation.y),
+    z: THREE.MathUtils.radToDeg(mesh.rotation.z)
+  };
+
+  meshFolder.add(meshRotation, 'x', -360, 360).name('Rotate X').onChange(value => {
+    mesh.rotation.x = THREE.MathUtils.degToRad(value);
+  });
+  meshFolder.add(meshRotation, 'y', -360, 360).name('Rotate Y').onChange(value => {
+    mesh.rotation.y = THREE.MathUtils.degToRad(value);
+  });
+  meshFolder.add(meshRotation, 'z', -360, 360).name('Rotate Z').onChange(value => {
+    mesh.rotation.z = THREE.MathUtils.degToRad(value);
+  });
+  meshFolder.open();
+
 });
 
 
@@ -95,16 +131,46 @@ new THREE.TextureLoader().load(url2, texture => {
   // 颜色不一致
   material.map.colorSpace = 'srgb';
   var mesh = new THREE.Mesh(geometry, material);
-  mesh.position.set(point2[0], point2[1], point2[2])
+
   // mesh.rotation.set(-degree2.pitch, -degree2.yaw, -degree2.roll);
   // const euler = new THREE.Euler(degree2.yaw, degree2.pitch, degree2.roll, 'ZYX'); 
   // mesh.rotation.set(-degree1.pitch, -degree1.yaw, -degree1.roll);
   // mesh.quaternion.setFromEuler(euler)
-  mesh.rotation.order = "YXZ"; // 偏航角(Y), 俯仰角(X), 滚动角(Z)  
-  mesh.rotation.y = -degree2.yaw;
-  mesh.rotation.x = degree2.pitch;
-  mesh.rotation.z = degree2.roll;
+
+  // mesh.rotation.order = "YXZ"; // 偏航角(Y), 俯仰角(X), 滚动角(Z)  
+  // mesh.rotation.y = -degree2.yaw;
+  // mesh.rotation.x = degree2.pitch;
+  // mesh.rotation.z = degree2.roll;
+
+  // mesh.rotation.order = 'ZXY';
+  // mesh.rotation.z = -degree2.yaw;    // Yaw  
+  // mesh.rotation.x = degree2.pitch;  // Pitch  
+  // mesh.rotation.y = degree2.roll;   // Roll  
+  // mesh.rotation.order = 'YXZ';
+  // mesh.rotation.y = THREE.MathUtils.degToRad(degree2.yaw) ;
+  camera.updateProjectionMatrix();
+  mesh.position.set(point2[0], point2[1], point2[2])
   scene.add(mesh);
+
+   // 添加旋转控制（使用度数）  
+   const meshFolder = cubeFolder.addFolder('2.png');
+   const meshRotation = {
+     x: THREE.MathUtils.radToDeg(mesh.rotation.x),
+     y: THREE.MathUtils.radToDeg(mesh.rotation.y),
+     z: THREE.MathUtils.radToDeg(mesh.rotation.z)
+   };
+ 
+   meshFolder.add(meshRotation, 'x', -360, 360).name('Rotate X').onChange(value => {
+     mesh.rotation.x = THREE.MathUtils.degToRad(value);
+   });
+   meshFolder.add(meshRotation, 'y', -360, 360).name('Rotate Y').onChange(value => {
+     mesh.rotation.y = THREE.MathUtils.degToRad(value);
+   });
+   meshFolder.add(meshRotation, 'z', -360, 360).name('Rotate Z').onChange(value => {
+     mesh.rotation.z = THREE.MathUtils.degToRad(value);
+   });
+   meshFolder.open();
+
 })
 
 
@@ -114,21 +180,91 @@ new THREE.TextureLoader().load(url3, texture => {
   var material = new THREE.MeshBasicMaterial({ map: texture });
   material.map.colorSpace = 'srgb';
   var mesh = new THREE.Mesh(geometry, material);
-  mesh.position.set(point3[0], point3[1], point3[2])
+
 
   // 进行旋转  
-  mesh.rotation.order = "YXZ"; // 偏航角(Y), 俯仰角(X), 滚动角(Z)  
-  // mesh.rotation.y = THREE.MathUtils.degToRad(-GimbalYawDegree);
-  // mesh.rotation.x = THREE.MathUtils.degToRad(GimbalPitchDegree);
-  // mesh.rotation.z = THREE.MathUtils.degToRad(GimbalRollDegree);
-  mesh.rotation.y = -degree3.yaw;
-  mesh.rotation.x = degree3.pitch;
-  mesh.rotation.z = degree3.roll;
+  // mesh.rotation.order = "YXZ"; // 偏航角(Y), 俯仰角(X), 滚动角(Z)  
+  // // mesh.rotation.y = THREE.MathUtils.degToRad(-GimbalYawDegree);
+  // // mesh.rotation.x = THREE.MathUtils.degToRad(GimbalPitchDegree);
+  // // mesh.rotation.z = THREE.MathUtils.degToRad(GimbalRollDegree);
+  // mesh.rotation.y = -degree3.yaw;
+  // mesh.rotation.x = degree3.pitch;
+  // mesh.rotation.z = degree3.roll;
   // mesh.rotation.set(-degree3.pitch, -degree3.yaw, -degree3.roll);
   // const euler = new THREE.Euler(degree3.yaw, degree3.pitch, degree3.roll, 'ZYX'); 
   // mesh.quaternion.setFromEuler(euler)
+
+  // mesh.rotation.order = 'YXZ';
+  // mesh.rotation.y =THREE.MathUtils.degToRad(degree1.yaw) ;  // Yaw  
+  // mesh.rotation.x = degree3.pitch;  // Pitch  
+  // mesh.rotation.y = degree3.roll;   // Roll  
+
+  camera.updateProjectionMatrix();
+  mesh.position.set(point3[0], point3[1], point3[2])
   scene.add(mesh);
+
+  // 添加旋转控制（使用度数）  
+   const meshFolder = cubeFolder.addFolder('3.png');
+   const meshRotation = {
+     x: THREE.MathUtils.radToDeg(mesh.rotation.x),
+     y: THREE.MathUtils.radToDeg(mesh.rotation.y),
+     z: THREE.MathUtils.radToDeg(mesh.rotation.z)
+   };
+ 
+   meshFolder.add(meshRotation, 'x', -360, 360).name('Rotate X').onChange(value => {
+     mesh.rotation.x = THREE.MathUtils.degToRad(value);
+   });
+   meshFolder.add(meshRotation, 'y', -360, 360).name('Rotate Y').onChange(value => {
+     mesh.rotation.y = THREE.MathUtils.degToRad(value);
+   });
+   meshFolder.add(meshRotation, 'z', -360, 360).name('Rotate Z').onChange(value => {
+     mesh.rotation.z = THREE.MathUtils.degToRad(value);
+   });
+   meshFolder.open();
 })
+
+
+// 创建立方体  
+const geometry = new THREE.BoxGeometry(30, 30, 30);
+const material = new THREE.MeshBasicMaterial({ color: 0x00ff00 });
+const cube = new THREE.Mesh(geometry, material);
+cube.position.set(0, -90, 0)
+scene.add(cube);
+// 创建dat.GUI  
+const gui = new GUI();
+const cubeFolder = gui.addFolder('cube-scale');
+cubeFolder.add(cube.scale, 'x', 0.1, 2);
+cubeFolder.add(cube.scale, 'y', 0.1, 2);
+cubeFolder.add(cube.scale, 'z', 0.1, 2);
+cubeFolder.open();
+// 添加旋转控制（使用度数）  
+const rotationFolder = cubeFolder.addFolder('cube-rotate');
+const cubeRotation = {
+  x: THREE.MathUtils.radToDeg(cube.rotation.x),
+  y: THREE.MathUtils.radToDeg(cube.rotation.y),
+  z: THREE.MathUtils.radToDeg(cube.rotation.z)
+};
+
+rotationFolder.add(cubeRotation, 'x', 0, 360).name('Rotate X').onChange(value => {
+  cube.rotation.x = THREE.MathUtils.degToRad(value);
+});
+rotationFolder.add(cubeRotation, 'y', 0, 360).name('Rotate Y').onChange(value => {
+  cube.rotation.y = THREE.MathUtils.degToRad(value);
+});
+rotationFolder.add(cubeRotation, 'z', 0, 360).name('Rotate Z').onChange(value => {
+  cube.rotation.z = THREE.MathUtils.degToRad(value);
+});
+rotationFolder.open();
+
+
+
+
+
+
+
+
+
+
 
 let line1 = get_line(point1, origin)
 scene.add(line1)
