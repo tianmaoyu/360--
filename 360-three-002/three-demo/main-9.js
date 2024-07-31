@@ -13,7 +13,7 @@ import proj4 from "proj4"
 import * as Units from "./units.js"
 
 import * as math from "mathjs"
-import * as TWEEN from 'tween'
+import {Tween,Easing} from '@tweenjs/tween.js'
 
 //北-东-地 相机初始
 const camera_matrix = [
@@ -377,6 +377,7 @@ function changeSphere(nextMesh) {
     currentMesh.geometry.scale(1 / sclae, 1 / sclae, 1 / sclae)
   }
 
+
   camera.position.set(x, y, z);
 
   var newTarget = new THREE.Vector3().copy(camera.position).normalize();
@@ -393,6 +394,14 @@ function changeSphere(nextMesh) {
   controls.update();
 }
 
+function tweem_camera(position) {
+  // 创建Tween对象并设置目标位置
+  var tween = new Tween(camera.position)
+    .to({ x: position.x, y: position.y, z: position.z }, 1000)
+    .easing(Easing.Quadratic.Out);
+
+  tween.start();
+}
 
 function changeCursorToHand(element) {
   element.style.cursor = 'pointer';
@@ -425,6 +434,5 @@ window.addEventListener('resize', () => {
 function animate(time) {
   requestAnimationFrame(animate);
   renderer.render(scene, camera);
-  TWEEN.update(time);
 }
 animate();  
