@@ -13,7 +13,7 @@ import proj4 from "proj4"
 import * as Units from "./units.js"
 
 import * as math from "mathjs"
-
+import * as TWEEN from 'tween'
 
 //北-东-地 相机初始
 const camera_matrix = [
@@ -229,7 +229,7 @@ const cube = new THREE.Mesh(geometry, material);
 cube.position.set(0, -90, 0)
 
 camera.position.set(0, 50, 100);
-camera.lookAt(new THREE.Vector3(1, 0, 0))
+camera.lookAt(new THREE.Vector3(1, 1, 1))
 // // z-y-x
 // let rotateMatrix = Units.rotateMatrix({ yaw: 0, pitch: 0, roll: 0 }, cube.position)
 // cube.applyMatrix4(rotateMatrix)
@@ -367,18 +367,27 @@ function changeSphere(nextMesh) {
   var x = nextMesh.position.x
   var y = nextMesh.position.y
   var z = nextMesh.position.z
-  camera.position.set(x - 1, y, z);
-  camera.lookAt(new THREE.Vector3(x + 1, y, z))
+
+  // 获取相机当前的朝向方向  
+  var direction = new THREE.Vector3();
+  camera.getWorldDirection(direction);
+
   // 当前的缩小
   if (currentMesh) {
     currentMesh.geometry.scale(1 / sclae, 1 / sclae, 1 / sclae)
   }
+
+  camera.position.set(x, y, z);
+
+  var newTarget = new THREE.Vector3().copy(camera.position).normalize();
+  camera.lookAt(newTarget.add(direction));
+
   //下一个
   nextMesh.geometry.scale(sclae, sclae, sclae)
   currentMesh = nextMesh
 
   // 设置围绕的中心点
-  controls.target.set(x, y, z); // 替换 x, y, z 为你的坐标值
+  controls.target.set(x, y, z + 1);
   // 更新相机位置以匹配新的目标点
   camera.updateProjectionMatrix();
   controls.update();
@@ -413,8 +422,9 @@ window.addEventListener('resize', () => {
 
 
 // 渲染循环  
-function animate() {
+function animate(time) {
   requestAnimationFrame(animate);
   renderer.render(scene, camera);
+  TWEEN.update(time);
 }
 animate();  
