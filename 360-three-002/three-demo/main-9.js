@@ -68,7 +68,7 @@ let radius = 20
 
 var url1 = "./imgs/1.JPG"
 var url2 = "./imgs/2.JPG"
-var url3 = "./imgs/3.JPG"
+var url3 = "./imgs/3.JPG" 
 
 
 
